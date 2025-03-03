@@ -14,11 +14,18 @@ public class GreetingController {
     @Autowired
     private GreetingService service;
 
+   // @PostMapping
+   // public Greeting createGreeting(@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName) {
+    //    User user = new User(firstName, lastName);
+   //    return service.addGreeting(user);
+   // }
     @PostMapping
-    public Greeting createGreeting(@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName) {
-        User user = new User(firstName, lastName);
+    public Greeting createGreeting(@RequestBody User user) {
         return service.addGreeting(user);
     }
+    @PostMapping("/{id}")
+    public String  createGreeting(@PathVariable Long id) {return "heello";}
+
 
     @GetMapping("/{id}")
     public Greeting getGreetingById(@PathVariable Long id) {
