@@ -1,9 +1,9 @@
+
 package com.example.GreetingApp.service;
 
 import com.example.GreetingApp.model.Greeting;
-import com.example.GreetingApp.model.User;
+import com.example.GreetingApp.model.AuthUser;
 import com.example.GreetingApp.repository.GreetingRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +20,10 @@ public class GreetingService implements IGreetingService {
     private GreetingRepository greetingRepository;
 
     @Override
-    public Greeting addGreeting(User user) {
-        String message = String.format(template, (user.toString().isEmpty()) ? "Hello World" : user.toString());
-
-        Greeting greeting = new Greeting(); // Create a new object
-        greeting.setMessage(message); // Set only the message, no manual ID assignment
-
-        return greetingRepository.save(greeting); // Save in DB
+    public Greeting addGreeting(AuthUser user) {
+        String message = String.format(template, (user.toString().isEmpty()) ? "World" : user.toString());
+        return greetingRepository.save(new Greeting(counter.incrementAndGet(), message));
     }
-
 
     @Override
     public Greeting getGreetingById(long id) {
@@ -38,14 +33,16 @@ public class GreetingService implements IGreetingService {
     public List<Greeting> getAllGreetings() {
         return greetingRepository.findAll();
     }
-    @Transactional
-    public Greeting updateGreeting(Long id, String message) {
-        return greetingRepository.findById(id).map(greeting -> {
-            greeting.setMessage(message);
-            return greetingRepository.saveAndFlush(greeting); // Ensures immediate update
-        }).orElse(null);
-    }
 
+    public Greeting updateGreeting(Long id, String message) {
+        Optional<Greeting> optionalGreeting = greetingRepository.findById(id);
+        if (optionalGreeting.isPresent()) {
+            Greeting greeting = optionalGreeting.get();
+            greeting.setMessage(message);
+            return greetingRepository.save(greeting);
+        }
+        return null;
+    }
 
     public void deleteGreeting(Long id) {
         greetingRepository.deleteById(id);
